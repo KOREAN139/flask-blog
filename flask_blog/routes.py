@@ -46,7 +46,11 @@ def contact_mail():
 		name = request.form['name']
 		email = request.form['email']
 		comments = request.form['comments']
-		send_email(u'반갑습니다.', MAIL_USERNAME, [email], u'반갑습니다 바디입니다', 'html')
+		send_email(u'반갑습니다.',
+					MAIL_USERNAME, 
+					[email], 
+					u'반갑습니다 바디입니다', 
+					u'%s님께서 보내주신 의견인 "%s"는 잘 읽어보았습니다.'%(name, comments))
 		return redirect(url_for('main'))
 
 @app.route('/a')
