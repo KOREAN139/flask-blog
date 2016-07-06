@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+	<meta charset="UTF-8">
+	<TITLE>
+		Flask Blog
+	</TITLE>
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.min.css') }}" type="text/css">
+	<script src="{{ url_for('static',filename='js/jquery-1.11.0.min.js') }}"></script>
+	<script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+
+	<style>
+		body {
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+		#leftside {
+			position: absolute;
+			width: 400px;
+			height: 100%;
+			background: #123456;
+			overflow-y: scroll;
+		}
+		#rightside {
+			position: absolute;
+			margin-left: 400px;
+			width: inherit;
+			height: 100%;
+			background: white;
+			overflow: scroll;
+			display: inline-block;
+		}
+	</style>
+</HEAD>
+<body>
+<div id="leftside">
+	<div class="container">
+	<h2 style="color: white;">
+		<a href="/create_post" style="color: white;">
+			글 작성하기
+		</a>
+	</h2>
+	{% for post in ret_posts %}
+	<h2 style="color: white;">
+		<a href="/post/{{post.post_id}}" style="color: white;">
+		{{ post.post_name }}
+		</a>
+	</h2>
+	{% endfor %}
+	</div>
+</div>
+<div id="rightside">
+{% block content %}
+{% endblock %}
+</div>
+
+</body>
+</html>

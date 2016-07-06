@@ -1,0 +1,13 @@
+{% extends "blog.html" %}
+{% block content %}
+
+<div class="container" style="width:inherit;">
+<h1>
+	{{ post.post_name }}
+	{{ post.post_author }}
+	{{ post.post_date }}
+	{{ post.post_body }}
+</h1>
+</div>
+
+{% endblock %}

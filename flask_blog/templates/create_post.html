@@ -1,0 +1,32 @@
+{% extends "blog_base.html" %}
+{% block content %}
+<!--
+blog attribute
+tutle, body, author, date
+-->
+<div class="container" style="padding-right:400px;">
+	<form action="/save_post" method="POST">
+		<div class="form-group">
+			<label>
+				포스트 제목
+			</label>
+			<input class="form-control" type="text" id="post_name" name="post_name" placeholder="포스트 제목을 쓰세요">
+		</div>
+		<div class="form-group">
+			<label>
+				포스트 작성자
+			</label>
+			<input class="form-control" type="text" id="post_author" name="post_author" placeholder="포스트 작성자를 쓰세요">
+		</div>
+		<div class="form-group">
+			<label>
+				포스트 내용
+			</label>
+			<textarea class="form-control" type="text" id="post_body" name="post_body">
+			</textarea>
+		</div>
+		<button class="btn btn-primary">저장하기</button>
+	</form>
+</div>
+
+{% endblock %}
