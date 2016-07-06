@@ -34,11 +34,11 @@ def send_email(subject, sender, recipients, text_body, html_body):
 	msg.html = html_body
 	send_async_email(app,msg)
 
-@app.route('/')
-def main():
-	return render_template('sub_main.html')
+@app.route('/lend')
+def lend():
+	return render_template('lend_main.html')
 
-@app.route('/contact_mail',methods=['GET','POST'])
+@app.route('/lend/contact_mail',methods=['GET','POST'])
 def contact_mail():
 	if request.method == 'GET':
 		return render_template('sub_main.html')
@@ -46,20 +46,17 @@ def contact_mail():
 		name = request.form['name']
 		email = request.form['email']
 		comments = request.form['comments']
-		send_email(u'반갑습니다.',
+		send_email(u'공학부 & 자연과학부 대여사업 건의사항 접수',
 					MAIL_USERNAME, 
-					[email], 
+					['korean139@gmail.com'], 
 					u'반갑습니다 바디입니다', 
-					u'%s님께서 보내주신 의견인 "%s"는 잘 읽어보았습니다.'%(name, comments))
-		return redirect(url_for('main'))
-
-@app.route('/a')
-def a():
-	return render_template('a.html')
-
-@app.route('/b')
-def b():
-	return render_template('b.html')
+					u'%s님께서 (%s) [ %s ] 의 내용을 보내셨습니다.'%(name, email, comments))
+		send_email(u'공학부 & 자연과학부 대여사업 건의사항 접수 완료 안내',
+					MAIL_USERNAME,
+					[email],
+					u'반갑습니다 바디입니다',
+					u'%s님께서 보내신 건의는 정상적으로 접수되었습니다. 더욱 노력하는 학생회가 되겠습니다. 감사합니다.'%(name))
+		return redirect(url_for('lend'))
 
 if __name__ == '__main__':
 	app.run(host='172.31.14.58', debug=True)
