@@ -22,6 +22,7 @@ app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
 from flask.ext.mail import Mail, Message
 mail = Mail(app)
 from decorators import async
+from operator import itemgetter # for sort list of dictionary
 import datetime # for get the current time
 import os # for check whether the path exists
 import commands # for create directory
@@ -100,7 +101,8 @@ def get_all_post_information(post_names):
 		for body in lines[3:]:
 			d['post_body'] += body
 		ret.append(d)
-	return ret
+	ret_sorted = sorted(ret, key=itemgetter('post_id'), reverse=True)
+	return ret_sorted
 
 def update_tag(post_tag, post_id):
 	filename = "/var/www/flask_blog/flask_blog/post/tag"
