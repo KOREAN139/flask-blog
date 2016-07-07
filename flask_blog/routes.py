@@ -102,6 +102,36 @@ def get_all_post_information(post_names):
 		ret.append(d)
 	return ret
 
+def update_tag(post_tag, post_id):
+	filename = "/var/www/flask_blog/flask_blog/post/tag"
+	new_tags = post_tag.strip().split('#')[1:]
+	if not new_tags:
+		return
+	s = ''
+	old_tags = []
+	curr_id = str(post_id)
+	itr = 0
+	new_tags.sort()
+	if os.path.isfile(filename):
+		with open(filename, 'r') as fp:
+			old_tags = fp.read().strip().split('\n')
+	if old_tags:
+		for tag in old_tags:
+			while tag.split(' ')[0] > new_tags[itr]:
+				s = s + new_tags[itr].strip() + ' ' + curr_id + '\n'
+				itr += 1
+			if tag.split(' ')[0] == new_tags[itr]:
+				s = s + tag + ' ' + curr_id + '\n'
+				itr += 1
+			else:
+				s = s + tag + '\n'
+	while itr < len(new_tags):
+		s = s + new_tags[itr].strip() + ' ' + curr_id + '\n'
+		itr += 1
+	with open(filename, 'w') as fp:
+		fp.write(s)
+	return
+
 """
 : blog route
 """
@@ -125,11 +155,13 @@ def save_post():
 		post_author = request.form['post_author']
 		post_body = request.form['post_body']
 		post_date = datetime.datetime.now()
+		post_tag = request.form['post_tag']
 		s = '%s\n%s\n%s\n%s'%(post_name,post_author,str(post_date),post_body)
 		print post_name, post_author, post_body, post_date
 		post_names = get_all_posts()
 		last_post_number = get_max_post_number(post_names)
-		next_filename = 'var/www/flask_blog/flask_blog/post/%d.post'%(last_post_number+1)
+		next_filename = '/var/www/flask_blog/flask_blog/post/%d.post'%(last_post_number+1)
+		update_tag(post_tag, last_post_number+1)
 		with open(next_filename, 'w') as fp:
 			fp.write(s)
 		return redirect(url_for('main'))
