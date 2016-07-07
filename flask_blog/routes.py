@@ -119,10 +119,10 @@ def update_tag(post_tag, post_id):
 			old_tags = fp.read().strip().split('\n')
 	if old_tags:
 		for tag in old_tags:
-			while tag.split(' ')[0] > new_tags[itr]:
+			while itr < len(new_tags) and tag.split(' ')[0] > new_tags[itr]:
 				s = s + new_tags[itr].strip() + ' ' + curr_id + '\n'
 				itr += 1
-			if tag.split(' ')[0] == new_tags[itr]:
+			if itr < len(new_tags) and tag.split(' ')[0] == new_tags[itr]:
 				s = s + tag + ' ' + curr_id + '\n'
 				itr += 1
 			else:
