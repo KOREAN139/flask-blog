@@ -109,6 +109,7 @@ def update_tag(post_tag, post_id):
 	new_tags = post_tag.strip().split('#')[1:]
 	if not new_tags:
 		return
+	new_len = len(new_tags)
 	s = ''
 	old_tags = []
 	curr_id = str(post_id)
@@ -119,15 +120,15 @@ def update_tag(post_tag, post_id):
 			old_tags = fp.read().strip().split('\n')
 	if old_tags:
 		for tag in old_tags:
-			while itr < len(new_tags) and tag.split(' ')[0] > new_tags[itr]:
+			while itr < new_len and tag.split()[0] > new_tags[itr].strip():
 				s = s + new_tags[itr].strip() + ' ' + curr_id + '\n'
 				itr += 1
-			if itr < len(new_tags) and tag.split(' ')[0] == new_tags[itr]:
+			if itr < new_len and tag.split()[0] == new_tags[itr].strip():
 				s = s + tag + ' ' + curr_id + '\n'
 				itr += 1
 			else:
 				s = s + tag + '\n'
-	while itr < len(new_tags):
+	while itr < new_len:
 		s = s + new_tags[itr].strip() + ' ' + curr_id + '\n'
 		itr += 1
 	with open(filename, 'w') as fp:
