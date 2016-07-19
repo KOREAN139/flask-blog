@@ -19,7 +19,12 @@ app.config["MAIL_USE_SSL"] = True
 app.config["MAIL_USERNAME"] = MAIL_USERNAME
 app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
 
-from flask.ext.mail import Mail, Message
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+#from flask.ext.mail import Mail, Message
+from flask_mail import Mail, Message
 mail = Mail(app)
 from decorators import async
 from operator import itemgetter # for sort list of dictionary
@@ -87,23 +92,51 @@ def get_all_posts():
 	filenames = glob.glob('/var/www/flask_blog/flask_blog/post/*.post')
 	return filenames
 
+def get_all_tags():
+	with open('/var/www/flask_blog/flask_blog/post/tag','r') as fp:
+		lines = fp.read().strip().split('\n')
+	d = {}
+	for line in lines:
+		if len(line) == 0:
+			continue
+		tag = line.split()[0]
+		post_id = str(line.split()[1])
+		if post_id in d:
+			d[post_id].append(tag)
+		else:
+			d[post_id] = [tag]
+	return d
+
 def get_all_post_information(post_names):
+	tags = get_all_tags()
+	comments = get_all_comments()
 	ret = []
 	for post_name in post_names:
 		d = {}
 		with open(post_name, 'r') as fp:
 			lines = fp.read().strip().split('\n')
-		d['post_id'] = post_name.split('/')[-1].split('.')[0]
+		post_id = post_name.split('/')[-1].split('.')[0]
+		d['post_id'] = post_id
 		d['post_name'] = lines[0]
 		d['post_author'] = lines[1]
 		d['post_date'] = lines[2]
 		d['post_body'] = ''
 		for body in lines[3:]:
-			d['post_body'] += body
+			d['post_body'] += body+'\n'
+		if post_id in tags:
+			d['post_tags'] = tags[post_id]
+		else:
+			d['post_tags'] = []
+		d['post_comments'] = []
+		if post_id in comments:
+			d['post_comments'] = comments[post_id]
+		else:
+			d['post_comments'] = []
 		ret.append(d)
 	ret_sorted = sorted(ret, key=itemgetter('post_id'), reverse=True)
 	return ret_sorted
 
+"""
 def update_tag(post_tag, post_id):
 	filename = "/var/www/flask_blog/flask_blog/post/tag"
 	new_tags = post_tag.strip().split('#')[1:]
@@ -134,6 +167,48 @@ def update_tag(post_tag, post_id):
 	with open(filename, 'w') as fp:
 		fp.write(s)
 	return
+"""
+
+def get_all_comments():
+	with open('/var/www/flask_blog/flask_blog/post/comment','r') as fp:
+		lines = fp.read().strip().split('\n')
+	d = {}
+	for line in lines:
+		if len(line.strip()) == 0:
+			continue
+		l = line.split()
+		comment_body = l[0].strip()
+		user_id = l[1].strip()
+		post_id = l[2].strip()
+		created_at = l[3].strip()
+		if post_id in d:
+			d[post_id].append({
+				'comment_body': comment_body,
+				'user_id': user_id,
+				'post_id': post_id,
+				'created_at': created_at,
+				})
+		else :
+			d[post_id] = [{
+				'comment_body': comment_body,
+				'user_id': user_id,
+				'post_id': post_id,
+				'created_at': created_at,
+				}]
+	return d
+
+def get_all_users():
+	with open('/var/www/flask_blog/flask_blog/post/user','r') as fp:
+		lines = fp.read().strip().split('\n')
+	d = {}
+	for line in lines:
+		if len(line.strip()) == 0:
+			continue
+		l = line.split()
+		user_id = l[0].strip()
+		user_name = l[1].strip()
+		d[user_id] = user_name
+	return d
 
 """
 : blog route
@@ -158,16 +233,41 @@ def save_post():
 		post_author = request.form['post_author']
 		post_body = request.form['post_body']
 		post_date = datetime.datetime.now()
-		post_tag = request.form['post_tag']
 		s = '%s\n%s\n%s\n%s'%(post_name,post_author,str(post_date),post_body)
 		print post_name, post_author, post_body, post_date
 		post_names = get_all_posts()
 		last_post_number = get_max_post_number(post_names)
-		next_filename = '/var/www/flask_blog/flask_blog/post/%d.post'%(last_post_number+1)
-		update_tag(post_tag, last_post_number+1)
+		post_id = last_post_number + 1
+		next_filename = '/var/www/flask_blog/flask_blog/post/%d.post'%(post_id)
+#		update_tag(post_tag, last_post_number+1)
 		with open(next_filename, 'w') as fp:
 			fp.write(s)
+		post_tags = request.form['tags'].split('#')
+		if not os.path.exists('/var/www/flask_blog/flask_blog/post/tag'):
+			commands.getoutput('touch /var/www/flask_blog/flask_blog/post/tag')
+		with open('/var/www/flask_blog/flask_blog/post/tag', 'a') as fp:
+			for post_tag in post_tags:
+				cur_tag = post_tag.strip()
+				if len(cur_tag) == 0:
+					continue
+				fp.write(cur_tag+' '+str(post_id)+'\n')
 		return redirect(url_for('main'))
+
+@app.route('/<post_id>/save_comment',methods=['POST'])
+def save_comment(post_id):
+	if request.method == 'POST':
+		comment_body = request.form['comment_body']
+		if len(comment_body.strip()) == 0:
+			return redirect('/post/%s'%post_id)
+		user_id = 1
+		created_at = datetime.datetime.now()
+		s = '%s %d %d %s\n'%(comment_body, user_id, int(post_id), str(created_at).split()[0])
+
+		base_path = '/var/www/flask_blog/flask_blog/post/'
+		comment_path = base_path + 'comment'
+		with open(comment_path, 'a') as fp:
+			fp.write(s)
+		return redirect('/post/%s'%post_id)
 
 @app.route('/post/<post_id>')
 def post_detail(post_id):

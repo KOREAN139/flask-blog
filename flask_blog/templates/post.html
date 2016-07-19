@@ -1,13 +1,35 @@
 {% extends "blog.html" %}
 {% block content %}
 
-<div class="container" style="width:inherit;">
+<div class="container" style="padding-right:400px;">
 <h1>
-	{{ post.post_name }}
-	{{ post.post_author }}
-	{{ post.post_date }}
-	{{ post.post_body }}
+	{{ post.post_name }}<br>
 </h1>
+<h2>
+	{{ post.post_author }}<br>
+	{{ post.post_date }}<br>
+	{{ post.post_body }}<br>
+</h2>
+<p>
+{% for tag in post.post_tags %}
+	#{{tag}}
+{% endfor %}
+</p>
+<form action="/{{post.post_id}}/save_comment" method='POST'>
+	<div class="form-group">
+		<label>
+			댓글 작성하기
+		</label>
+		<input class="form-control" type="text" id="comment_body" name="comment_body" placeholder="당신의 이야기를 들려주세요" autofocus="true">
+	</div>
+	<button class="btn btn-primary">
+		저장하기
+	</button>
+</form>
+{% for comment in post.post_comments %}
+	{{ comment.user_name }} {{ comment.comment_body }} {{ comment.created_at }}
+	<br>
+{% endfor %}
 </div>
 
 {% endblock %}
