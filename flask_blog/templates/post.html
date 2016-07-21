@@ -8,13 +8,21 @@
 <h2>
 	{{ post.post_author }}<br>
 	{{ post.post_date }}<br>
-	{{ post.post_body }}<br>
+	{{ post.post_body | safe }}<br>
 </h2>
 <p>
 {% for tag in post.post_tags %}
 	#{{tag}}
 {% endfor %}
 </p>
+
+{% if 'logged_in' in session %}
+{% if post.post_liked %}
+<i class="fa fa-heart" aria-hidden="true" id="like-button" style="color:#eb7b7b"></i>
+{% else %}
+<i class="fa fa-heart" aria-hidden="true" id="like-button" style="color:#777777"></i>
+{% endif %}
+
 <form action="/{{post.post_id}}/save_comment" method='POST'>
 	<div class="form-group">
 		<label>
@@ -22,14 +30,39 @@
 		</label>
 		<input class="form-control" type="text" id="comment_body" name="comment_body" placeholder="당신의 이야기를 들려주세요" autofocus="true">
 	</div>
-	<button class="btn btn-primary">
-		저장하기
-	</button>
+	<button class="btn btn-primary">저장하기</button>
 </form>
+{% endif %}
+
 {% for comment in post.post_comments %}
 	{{ comment.user_name }} {{ comment.comment_body }} {{ comment.created_at }}
 	<br>
 {% endfor %}
 </div>
 
+<script type="text/javascript">
+$('#like-button').click(function() {
+    var data = {
+    "user_id": {{ session['user_id'] }},
+    };
+    $.ajax({
+		url: '/user_like_post/{{post.post_id}}',
+        data: data,
+        type: 'POST',
+        success: function(response) {
+            var jsonData = JSON.parse(response);
+            if ( jsonData["is_liked"] ) {
+                $('#like-button').css('color','#eb7b7b');
+                $('#like-button').css('font-weight','400');
+            } else {
+                $('#like-button').css('color','#777777');
+                $('#like-button').css('font-weight','600');
+            }
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+});
+</script>
 {% endblock %}

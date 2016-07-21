@@ -4,7 +4,7 @@
 blog attribute
 tutle, body, author, date
 -->
-<div class="container" style="padding-right:400px;">
+<div class="container" style="padding-right: 305px;">
 	<form action="/save_post" method="POST">
 		<div class="form-group">
 			<label>
@@ -22,12 +22,15 @@ tutle, body, author, date
 			<label>
 				포스트 내용
 			</label>
+			<textarea id="summernote" name="post_body">Hello Summernote</textarea>
+			<!--
 			<textarea class="form-control" type="text" id="post_body" name="post_body" placeholder="포스트 내용을 작성하세요">
 			</textarea>
+			-->
 		</div>
 		<div class="form-group">
 			<label>
-				포스트 태그
+				해시태그
 			</label>
 			<textarea class="form-control" type="text" id="tags" name="tags" placeholder="태그를 입력하세요. ex) #나미">
 			</textarea>
@@ -35,5 +38,13 @@ tutle, body, author, date
 		<button class="btn btn-primary">저장하기</button>
 	</form>
 </div>
+
+<script>
+$(document).ready(function() {
+		$('#summernote').summernote({
+			height: 300
+			});
+});
+</script>
 
 {% endblock %}

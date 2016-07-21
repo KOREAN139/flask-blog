@@ -1,4 +1,12 @@
 {% extends "blog_base.html" %}
 {% block content %}
 
+<div class="container" style="padding-right:305px;">
+    <h1>
+        로그인 잘하셨어요!!
+        <br>
+        {{ session['username'] }}님 환영합니다
+    </h1>
+</div>
+
 {% endblock %}
